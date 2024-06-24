@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Random URL Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #urlList {
+            text-align: left;
+            margin: 20px auto;
+            width: 50%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        button {
+            margin: 10px;
+        }
+        #customUrlTemplateContainer {
+            display: none;
+        }
+        #charLengthContainer {
+            display: none;
+        }
+    </style>
+    <script>
+        function generateRandomURL() {
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const tlds = [
+                'com', 'net', 'org', 'io', 'biz', 'info', 'co', 'us', 'uk', 'xyz', 'dev', 'app',
+                'top', 'live', 'site', 'shop', 'tech', 'link', 'blog', 'club', 'name', 'team',
+                'page', 'one', 'fund', 'life', 'news', 'guru', 'cool', 'zone', 'host', 'rent',
+                'plus', 'wiki', 'cash', 'fail', 'help', 'jobs', 'love', 'move', 'pics',
+                'post', 'show', 'tours', 'work', 'asia', 'best', 'camp', 'city', 'cook', 'deal',
+                'fans', 'gift', 'gold', 'hunt', 'kred', 'loan', 'luxe', 'menu', 'pics', 'rich',
+                'sale', 'shop', 'tips', 'vote', 'walk', 'yoga'
+            ];
+
+            // Function to generate a random string
+            function getRandomString(minLength, maxLength, customChars = characters) {
+                const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += customChars.charAt(Math.floor(Math.random() * customChars.length));
+                }
+                return result;
+            }
+
+            // Function to generate a random IP address
+            function getRandomIP() {
+                return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+            }
+
+            // Get number of URLs to generate
+            const numLinks = document.getElementById('numLinks').value;
+            const urlType = document.getElementById('urlType').value;
+            const customUrlTemplate = document.getElementById('customUrlTemplate').value;
+            const customChars = document.getElementById('customChars').value.split(',').join('') || characters;
+            const charLength = document.getElementById('charLength').value;
+            const urlList = document.getElementById('urlList');
+            urlList.innerHTML = ''; // Clear previous URLs
+
+            let allUrls = '';
+
+            // Generate and display URLs based on selected type
+            for (let i = 0; i < numLinks; i++) {
+                let url;
+                const length = charLength ? parseInt(charLength, 10) : undefined;
+
+                if (urlType === 'standard') {
+                    const domain = length ? getRandomString(length, length) : getRandomString(5, 15);
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    const tld = tlds[Math.floor(Math.random() * tlds.length)];
+                    url = `https://${domain}.${tld}/${path}`;
+                } else if (urlType === 'googleusercontent') {
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `https://www.googleapis.com/content/v1/${path}`;
+                } else if (urlType === 'ip') {
+                    const ip = getRandomIP();
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `http://${ip}/${path}`;
+                } else if (urlType === 'github') {
+                    const user = length ? getRandomString(length, length) : getRandomString(5, 10);
+                    const repo = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `https://github.com/${user}/${repo}/${path}`;
+                } else if (urlType === 'custom') {
+                    url = customUrlTemplate.replace(/%/g, () => length ? getRandomString(length, length) : getRandomString(5, 10))
+                                           .replace(/\$/g, () => length ? getRandomString(length, length, customChars) : getRandomString(5, 10, customChars));
+                } else if (urlType === 'aws') {
+                    const bucket = length ? getRandomString(length, length) : getRandomString(5, 15);
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `https://s3.amazonaws.com/${bucket}/${path}`;
+                } else if (urlType === 'azure') {
+                    const account = length ? getRandomString(length, length) : getRandomString(5, 10);
+                    const container = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `https://${account}.blob.core.windows.net/${container}/${path}`;
+                } else if (urlType === 'dropbox') {
+                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    url = `https://www.dropbox.com/s/${path}`;
+                } else if (urlType === 'youtube') {
+                    const videoId = length ? getRandomString(length, length) : getRandomString(11, 11);
+                    url = `https://www.youtube.com/watch?v=${videoId}`;
+                } else if (urlType === 'bitly') {
+                    const path = length ? getRandomString(length, length) : getRandomString(7, 7);
+                    url = `https://bit.ly/${path}`;
+                }
+                const urlItem = document.createElement('p');
+                urlItem.textContent = url;
+                urlList.appendChild(urlItem);
+                allUrls += url + '\n';
+            }
+
+            // Store all URLs in a hidden textarea for copying
+            const textarea = document.createElement('textarea');
+            textarea.value = allUrls;
+            textarea.style.position = 'absolute';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.id = 'copyArea';
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById('copyArea');
+            copyText.select();
+            document.execCommand('copy');
+            alert('URLs copied to clipboard!');
+        }
+
+        function handleUrlTypeChange() {
+            const urlType = document.getElementById('urlType').value;
+            const customUrlTemplateContainer = document.getElementById('customUrlTemplateContainer');
+            const charLengthContainer = document.getElementById('charLengthContainer');
+            if (urlType === 'custom') {
+                customUrlTemplateContainer.style.display = 'block';
+                charLengthContainer.style.display = 'block';
+            } else {
+                customUrlTemplateContainer.style.display = 'none';
+                charLengthContainer.style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Random URL Generator</h1>
+    <label for="numLinks">Number of URLs to generate (up to 1000):</label>
+    <input type="number" id="numLinks" name="numLinks" min="1" max="1000" value="1">
+    <br>
+    <label for="urlType">Select URL type:</label>
+    <select id="urlType" name="urlType" onchange="handleUrlTypeChange()">
+        <option value="standard">Standard</option>
+        <option value="googleusercontent">Googleusercontent</option>
+        <option value="ip">IP-based</option>
+        <option value="github">GitHub</option>
+        <option value="custom">Custom</option>
+        <option value="aws">AWS S3</option>
+        <option value="azure">Azure Blob</option>
+        <option value="dropbox">Dropbox</option>
+        <option value="youtube">YouTube</option>
+        <option value="bitly">Bitly</option>
+    </select>
+    <br>
+    <div id="customUrlTemplateContainer">
+        <label for="customUrlTemplate">Enter custom URL template (use % for random values, $ for custom characters):</label>
+        <input type="text" id="customUrlTemplate" name="customUrlTemplate" placeholder="https://example.com/%/$">
+        <br>
+        <label for="customChars">Enter characters for custom generation (used for $ in template, separated by commas):</label>
+        <input type="text" id="customChars" name="customChars" placeholder="a,b,c,1,2,3">
+    </div>
+    <br>
+    <div id="charLengthContainer">
+        <label for="charLength">Enter the number of characters for the generated parts (leave blank for random length):</label>
+        <input type="number" id="charLength" name="charLength" min="1">
+    </div>
+    <br>
+    <button onclick="generateRandomURL()">Generate URLs</button>
+    <button onclick="copyToClipboard()">Copy to Clipboard</button>
+    <div id="urlList"></div>
+</body>
+</html>
