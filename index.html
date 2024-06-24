@@ -78,8 +78,9 @@
                     const tld = tlds[Math.floor(Math.random() * tlds.length)];
                     url = `https://${domain}.${tld}/${path}`;
                 } else if (urlType === 'googleusercontent') {
+                    const ip = getRandomIP();
                     const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://www.googleapis.com/content/v1/${path}`;
+                    url = `https://${ip}.bc.googleusercontent.com/${path}`;
                 } else if (urlType === 'ip') {
                     const ip = getRandomIP();
                     const path = length ? getRandomString(length, length) : getRandomString(3, 10);
