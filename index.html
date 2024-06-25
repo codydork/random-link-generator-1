@@ -41,8 +41,7 @@
                 'sale', 'shop', 'tips', 'vote', 'walk', 'yoga'
             ];
 
-            function getRandomString(minLength, maxLength, customChars = characters) {
-                const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+            function getRandomString(length, customChars = characters) {
                 let result = '';
                 for (let i = 0; i < length; i++) {
                     result += customChars.charAt(Math.floor(Math.random() * customChars.length));
@@ -88,8 +87,8 @@
                     const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
                     url = `https://github.com/${user}/${repo}${path}`;
                 } else if (urlType === 'custom') {
-                    url = customUrlTemplate.replace(/%/g, () => length ? getRandomString(length, length) : getRandomString(5, 10))
-                                           .replace(/\$/g, () => length ? getRandomString(length, length, customChars) : getRandomString(5, 10, customChars));
+                    url = customUrlTemplate.replace(/%+/g, (match) => getRandomString(match.length))
+                                           .replace(/\$+/g, (match) => getRandomString(match.length, customChars));
                 } else if (urlType === 'aws') {
                     const bucket = length ? getRandomString(length, length) : getRandomString(5, 15);
                     const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
@@ -165,7 +164,7 @@
     <br>
     <div id="customUrlTemplateContainer">
         <label for="customUrlTemplate">Enter custom URL template (use % for random values, $ for custom characters):</label>
-        <input type="text" id="customUrlTemplate" name="customUrlTemplate" placeholder="https://example.com/%/$">
+        <input type="text" id="customUrlTemplate" name="customUrlTemplate" placeholder="https://example.com/%%%%%/$$$$$">
         <br>
         <label for="customChars">Enter characters for custom generation (used for $ in template, separated by commas):</label>
         <input type="text" id="customChars" name="customChars" placeholder="a,b,c,1,2,3">
