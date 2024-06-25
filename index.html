@@ -41,7 +41,6 @@
                 'sale', 'shop', 'tips', 'vote', 'walk', 'yoga'
             ];
 
-            // Function to generate a random string
             function getRandomString(minLength, maxLength, customChars = characters) {
                 const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
                 let result = '';
@@ -51,66 +50,64 @@
                 return result;
             }
 
-            // Function to generate a random IP address
             function getRandomIP() {
                 return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
             }
 
-            // Get number of URLs to generate
             const numLinks = document.getElementById('numLinks').value;
             const urlType = document.getElementById('urlType').value;
             const customUrlTemplate = document.getElementById('customUrlTemplate').value;
             const customChars = document.getElementById('customChars').value.split(',').join('') || characters;
             const charLength = document.getElementById('charLength').value;
+            const disablePath = document.getElementById('disablePath').checked;
             const urlList = document.getElementById('urlList');
-            urlList.innerHTML = ''; // Clear previous URLs
+            urlList.innerHTML = '';
 
             let allUrls = '';
 
-            // Generate and display URLs based on selected type
             for (let i = 0; i < numLinks; i++) {
                 let url;
                 const length = charLength ? parseInt(charLength, 10) : undefined;
 
                 if (urlType === 'standard') {
                     const domain = length ? getRandomString(length, length) : getRandomString(5, 15);
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
                     const tld = tlds[Math.floor(Math.random() * tlds.length)];
-                    url = `https://${domain}.${tld}/${path}`;
+                    url = `https://${domain}.${tld}${path}`;
                 } else if (urlType === 'googleusercontent') {
                     const ip = getRandomIP();
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://${ip}.bc.googleusercontent.com/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `https://${ip}.bc.googleusercontent.com${path}`;
                 } else if (urlType === 'ip') {
                     const ip = getRandomIP();
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `http://${ip}/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `http://${ip}${path}`;
                 } else if (urlType === 'github') {
                     const user = length ? getRandomString(length, length) : getRandomString(5, 10);
                     const repo = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://github.com/${user}/${repo}/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `https://github.com/${user}/${repo}${path}`;
                 } else if (urlType === 'custom') {
                     url = customUrlTemplate.replace(/%/g, () => length ? getRandomString(length, length) : getRandomString(5, 10))
                                            .replace(/\$/g, () => length ? getRandomString(length, length, customChars) : getRandomString(5, 10, customChars));
                 } else if (urlType === 'aws') {
                     const bucket = length ? getRandomString(length, length) : getRandomString(5, 15);
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://s3.amazonaws.com/${bucket}/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `https://s3.amazonaws.com/${bucket}${path}`;
                 } else if (urlType === 'azure') {
                     const account = length ? getRandomString(length, length) : getRandomString(5, 10);
                     const container = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://${account}.blob.core.windows.net/${container}/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `https://${account}.blob.core.windows.net/${container}${path}`;
                 } else if (urlType === 'dropbox') {
-                    const path = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    url = `https://www.dropbox.com/s/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
+                    url = `https://www.dropbox.com/s${path}`;
                 } else if (urlType === 'youtube') {
                     const videoId = length ? getRandomString(length, length) : getRandomString(11, 11);
                     url = `https://www.youtube.com/watch?v=${videoId}`;
                 } else if (urlType === 'bitly') {
-                    const path = length ? getRandomString(length, length) : getRandomString(7, 7);
-                    url = `https://bit.ly/${path}`;
+                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(7, 7)}`;
+                    url = `https://bit.ly${path}`;
                 }
                 const urlItem = document.createElement('p');
                 urlItem.textContent = url;
@@ -118,7 +115,6 @@
                 allUrls += url + '\n';
             }
 
-            // Store all URLs in a hidden textarea for copying
             const textarea = document.createElement('textarea');
             textarea.value = allUrls;
             textarea.style.position = 'absolute';
@@ -179,6 +175,9 @@
         <label for="charLength">Enter the number of characters for the generated parts (leave blank for random length):</label>
         <input type="number" id="charLength" name="charLength" min="1">
     </div>
+    <br>
+    <label for="disablePath">Disable Path:</label>
+    <input type="checkbox" id="disablePath" name="disablePath">
     <br>
     <button onclick="generateRandomURL()">Generate URLs</button>
     <button onclick="copyToClipboard()">Copy to Clipboard</button>
