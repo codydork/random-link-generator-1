@@ -31,83 +31,140 @@
     <script>
         function generateRandomURL() {
             const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            const tlds = [
-                'com', 'net', 'org', 'io', 'biz', 'info', 'co', 'us', 'uk', 'xyz', 'dev', 'app',
-                'top', 'live', 'site', 'shop', 'tech', 'link', 'blog', 'club', 'name', 'team',
-                'page', 'one', 'fund', 'life', 'news', 'guru', 'cool', 'zone', 'host', 'rent',
-                'plus', 'wiki', 'cash', 'fail', 'help', 'jobs', 'love', 'move', 'pics',
-                'post', 'show', 'tours', 'work', 'asia', 'best', 'camp', 'city', 'cook', 'deal',
-                'fans', 'gift', 'gold', 'hunt', 'kred', 'loan', 'luxe', 'menu', 'pics', 'rich',
-                'sale', 'shop', 'tips', 'vote', 'walk', 'yoga'
-            ];
+            const freednsDomains = ['chickenkiller.com', 'mooo.com', 'us.to', 'dyn-o-saur.com', 'ignorelist.com'];
+            const tlds = ['com', 'net', 'org', 'io', 'dev', 'app', 'xyz'];
 
-            function getRandomString(length, customChars = characters) {
+            function getRandomString(length, chars = characters) {
                 let result = '';
                 for (let i = 0; i < length; i++) {
-                    result += customChars.charAt(Math.floor(Math.random() * customChars.length));
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
                 return result;
             }
 
             function getRandomIP() {
-                return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+                return `${Math.floor(Math.random() * 223 + 1)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
             }
 
-            const numLinks = document.getElementById('numLinks').value;
+            const numLinks = parseInt(document.getElementById('numLinks').value, 10);
             const urlType = document.getElementById('urlType').value;
             const customUrlTemplate = document.getElementById('customUrlTemplate').value;
             const customChars = document.getElementById('customChars').value.split(',').join('') || characters;
-            const charLength = document.getElementById('charLength').value;
+            const charLength = parseInt(document.getElementById('charLength').value, 10) || undefined;
             const disablePath = document.getElementById('disablePath').checked;
             const urlList = document.getElementById('urlList');
             urlList.innerHTML = '';
+
+            if (isNaN(numLinks) || numLinks < 1 || numLinks > 1000) {
+                alert("Please enter a valid number of URLs between 1 and 1000.");
+                return;
+            }
 
             let allUrls = '';
 
             for (let i = 0; i < numLinks; i++) {
                 let url;
-                const length = charLength ? parseInt(charLength, 10) : undefined;
+                const randDomainLength = charLength || Math.floor(Math.random() * 11) + 5;
+                const randPathLength = charLength || Math.floor(Math.random() * 8) + 3;
 
-                if (urlType === 'standard') {
-                    const domain = length ? getRandomString(length, length) : getRandomString(5, 15);
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    const tld = tlds[Math.floor(Math.random() * tlds.length)];
-                    url = `https://${domain}.${tld}${path}`;
-                } else if (urlType === 'googleusercontent') {
-                    const ip = getRandomIP();
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `https://${ip}.bc.googleusercontent.com${path}`;
-                } else if (urlType === 'ip') {
-                    const ip = getRandomIP();
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `http://${ip}${path}`;
-                } else if (urlType === 'github') {
-                    const user = length ? getRandomString(length, length) : getRandomString(5, 10);
-                    const repo = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `https://github.com/${user}/${repo}${path}`;
-                } else if (urlType === 'custom') {
-                    url = customUrlTemplate.replace(/%+/g, (match) => getRandomString(match.length))
-                                           .replace(/\$+/g, (match) => getRandomString(match.length, customChars));
-                } else if (urlType === 'aws') {
-                    const bucket = length ? getRandomString(length, length) : getRandomString(5, 15);
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `https://s3.amazonaws.com/${bucket}${path}`;
-                } else if (urlType === 'azure') {
-                    const account = length ? getRandomString(length, length) : getRandomString(5, 10);
-                    const container = length ? getRandomString(length, length) : getRandomString(3, 10);
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `https://${account}.blob.core.windows.net/${container}${path}`;
-                } else if (urlType === 'dropbox') {
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(3, 10)}`;
-                    url = `https://www.dropbox.com/s${path}`;
-                } else if (urlType === 'youtube') {
-                    const videoId = length ? getRandomString(length, length) : getRandomString(11, 11);
-                    url = `https://www.youtube.com/watch?v=${videoId}`;
-                } else if (urlType === 'bitly') {
-                    const path = disablePath ? '' : `/${length ? getRandomString(length, length) : getRandomString(7, 7)}`;
-                    url = `https://bit.ly${path}`;
+                switch (urlType) {
+                    case 'standard':
+                        const domain = getRandomString(randDomainLength);
+                        const path = disablePath ? '' : `/${getRandomString(randPathLength)}`;
+                        const tld = tlds[Math.floor(Math.random() * tlds.length)];
+                        url = `https://${domain}.${tld}${path}`;
+                        break;
+                    case 'googleusercontent':
+                        url = `https://${getRandomIP()}.bc.googleusercontent.com${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'ip':
+                        url = `http://${getRandomIP()}${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'github':
+                        const user = getRandomString(randDomainLength);
+                        const repo = getRandomString(randPathLength);
+                        url = `https://github.com/${user}/${repo}${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'custom':
+                        url = customUrlTemplate
+                            .replace(/%+/g, match => getRandomString(match.length))
+                            .replace(/\$+/g, match => getRandomString(match.length, customChars));
+                        break;
+                    case 'aws':
+                        url = `https://s3.amazonaws.com/${getRandomString(randDomainLength)}${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'azure':
+                        const account = getRandomString(randDomainLength);
+                        const container = getRandomString(randPathLength);
+                        url = `https://${account}.blob.core.windows.net/${container}${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'dropbox':
+                        url = `https://www.dropbox.com/s${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'youtube':
+                        url = `https://www.youtube.com/watch?v=${getRandomString(11)}`;
+                        break;
+                    case 'bitly':
+                        url = `https://bit.ly${disablePath ? '' : `/${getRandomString(7)}`}`;
+                        break;
+                    case 'netlify':
+                        const netlifyProj = getRandomString(randDomainLength);
+                        url = `https://${netlifyProj}.netlify.app${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'vercel':
+                        const vercelProj = getRandomString(randDomainLength);
+                        url = `https://${vercelProj}.vercel.app${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'glitch':
+                        const glitchProj = getRandomString(randDomainLength);
+                        url = `https://${glitchProj}.glitch.me${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'railway':
+                        const railwayProj = getRandomString(randDomainLength);
+                        url = `https://${railwayProj}.railway.app${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'heroku':
+                        const herokuProj = getRandomString(randDomainLength);
+                        url = `https://${herokuProj}.herokuapp.com${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'firebase':
+                        const firebaseProj = getRandomString(randDomainLength);
+                        url = `https://${firebaseProj}.web.app${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'replit':
+                        const replProj = getRandomString(randDomainLength);
+                        url = `https://${replProj}.repl.co${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'codesandbox':
+                        const csProj = getRandomString(randDomainLength);
+                        url = `https://${csProj}.csb.app${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'stackblitz':
+                        const sbProj = getRandomString(randDomainLength);
+                        url = `https://${sbProj}.stackblitz.io${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'render':
+                        const renderProj = getRandomString(randDomainLength);
+                        url = `https://${renderProj}.onrender.com${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'fly':
+                        const flyProj = getRandomString(randDomainLength);
+                        url = `https://${flyProj}.fly.dev${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'surge':
+                        const surgeProj = getRandomString(randDomainLength);
+                        url = `https://${surgeProj}.surge.sh${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    case 'freedns':
+                        const freednsProj = getRandomString(randDomainLength);
+                        const freednsDomain = freednsDomains[Math.floor(Math.random() * freednsDomains.length)];
+                        url = `https://${freednsProj}.${freednsDomain}${disablePath ? '' : `/${getRandomString(randPathLength)}`}`;
+                        break;
+                    default:
+                        url = 'Invalid URL Type';
+                        break;
                 }
+
                 const urlItem = document.createElement('p');
                 urlItem.textContent = url;
                 urlList.appendChild(urlItem);
@@ -124,22 +181,21 @@
 
         function copyToClipboard() {
             const copyText = document.getElementById('copyArea');
-            copyText.select();
-            document.execCommand('copy');
-            alert('URLs copied to clipboard!');
+            if (copyText) {
+                copyText.select();
+                document.execCommand('copy');
+                alert('URLs copied to clipboard!');
+            } else {
+                alert('No URLs to copy!');
+            }
         }
 
         function handleUrlTypeChange() {
             const urlType = document.getElementById('urlType').value;
             const customUrlTemplateContainer = document.getElementById('customUrlTemplateContainer');
             const charLengthContainer = document.getElementById('charLengthContainer');
-            if (urlType === 'custom') {
-                customUrlTemplateContainer.style.display = 'block';
-                charLengthContainer.style.display = 'block';
-            } else {
-                customUrlTemplateContainer.style.display = 'none';
-                charLengthContainer.style.display = 'block';
-            }
+            customUrlTemplateContainer.style.display = (urlType === 'custom') ? 'block' : 'none';
+            charLengthContainer.style.display = 'block';
         }
     </script>
 </head>
@@ -160,6 +216,19 @@
         <option value="dropbox">Dropbox</option>
         <option value="youtube">YouTube</option>
         <option value="bitly">Bitly</option>
+        <option value="netlify">Netlify</option>
+        <option value="vercel">Vercel</option>
+        <option value="glitch">Glitch</option>
+        <option value="railway">Railway</option>
+        <option value="heroku">Heroku</option>
+        <option value="firebase">Firebase</option>
+        <option value="replit">Replit</option>
+        <option value="codesandbox">CodeSandbox</option>
+        <option value="stackblitz">StackBlitz</option>
+        <option value="render">Render</option>
+        <option value="fly">Fly.io</option>
+        <option value="surge">Surge</option>
+        <option value="freedns">FreeDNS (chickenkiller.org, mooo.com)</option>
     </select>
     <br>
     <div id="customUrlTemplateContainer">
